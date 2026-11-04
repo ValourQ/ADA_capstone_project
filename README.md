@@ -1,4 +1,4 @@
-# Mini-Courier Planner (DAA Capstone Project)
+# Mini-Courier Planner (ADA Capstone Project)
 
 A modular, end-to-end algorithmic system for optimal last-mile parcel dispatch and courier route scheduling. This project integrates four core Design and Analysis of Algorithms (DAA) paradigms into a cohesive logistics decision pipeline:
 
