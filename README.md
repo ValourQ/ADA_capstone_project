@@ -53,14 +53,6 @@ A modular, end-to-end algorithmic system for optimal last-mile parcel dispatch a
 | **Pathfinding** | `graph.py` | Greedy with Min-Heap (Dijkstra) | $O((V + E) \log V)$ per source | $O(V)$ | Finds shortest road distances and intermediate junctions between stops. |
 | **Route Synthesis**| `tsp.py` | Greedy Approximation (Nearest Neighbor) | $O(K^2)$ for $K$ destinations | $O(K)$ | Constructs closed delivery circuit starting and finishing at Depot (Node 0). |
 
-*Notation:*
-- $N$: Total number of parcels available.
-- $W$: Delivery vehicle maximum payload capacity (kg).
-- $V$: Number of junction vertices in the road network graph.
-- $E$: Number of road edges connecting vertices.
-- $K$: Number of distinct delivery stops selected for delivery ($K \le \min(N, V)$).
-
----
 
 ## 3. Project Directory Structure
 
