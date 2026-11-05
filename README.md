@@ -84,43 +84,9 @@ courier_planner/
 
 ---
 
-## 4. Setup & How to Run
 
-### Prerequisites
-- Python 3.9+ (Python 3.13 tested)
-- `matplotlib` (for benchmark graph rendering)
 
-Install dependencies if needed:
-```bash
-pip install matplotlib
-```
-
-### 1. Run Full End-to-End Pipeline (Small Dataset)
-Demonstrates parcel sorting, 0/1 Knapsack with DP table display, Dijkstra pathfinding, and TSP routing:
-```bash
-python courier_planner/main.py --dataset small
-```
-
-### 2. Run Full Pipeline on Large Dataset (500 Parcels / 100 Nodes)
-```bash
-python courier_planner/main.py --dataset large
-```
-
-### 3. Run Benchmark Suite & Generate Scaling Chart
-Executes 5 iterations across sizes $N \in [10, 50, 100, 200, 500]$, outputs an ASCII performance table, and saves the visualization to `runtime.png`:
-```bash
-python courier_planner/benchmark.py
-```
-
-### 4. Regenerate Synthetic Datasets
-Rebuilds reproducible datasets using fixed pseudo-random seeds:
-```bash
-python courier_planner/parcels.py
-```
-
----
-
-## 5. Sample Execution Output
+## 4. Sample Execution Output
 
 ### Small Dataset (`small.json`)
 ```
@@ -208,7 +174,7 @@ Total Round-Trip Distance: 122 km
 
 ---
 
-## 6. Verification and Tests
+## 5. Verification and Tests
 
 All modules include standalone unit self-tests that can be executed directly:
 - `python courier_planner/sorting.py`: Verifies Merge Sort ordering and tie-breaking.
