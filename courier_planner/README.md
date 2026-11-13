@@ -1,218 +1,148 @@
-# Mini-Courier Planner (DAA Capstone Project)
+# Mini-Courier Planner
 
-A modular, end-to-end algorithmic system for optimal last-mile parcel dispatch and courier route scheduling. This project integrates four core Design and Analysis of Algorithms (DAA) paradigms into a cohesive logistics decision pipeline:
+An algorithm-based courier planning application developed for the Design and Analysis of Algorithms (ADA) capstone. The application combines parcel sorting, capacity-constrained parcel selection, shortest-path computation, and approximate delivery-route construction.
 
-1. **Divide-and-Conquer:** Custom Merge Sort for multi-criteria deadline & priority sorting.
-2. **Dynamic Programming:** 0/1 Knapsack for value-maximizing vehicle payload selection within weight constraints.
-3. **Greedy Graph Traversal:** Min-heap Dijkstra for single-source and all-pairs shortest paths across road networks.
-4. **Heuristic Approximation:** Nearest-Neighbor Traveling Salesperson Problem (TSP) for round-trip route synthesis.
+## Project Overview
 
----
+The system processes parcel orders and a weighted road network through the following stages:
 
-## 1. System Architecture & Workflow
+1. **Parcel ordering — Merge Sort:** orders parcels by ascending delivery deadline, then descending priority.
+2. **Cargo selection — 0/1 Knapsack:** selects a subset of parcels that maximizes total priority value without exceeding the vehicle's weight capacity.
+3. **Shortest paths — Dijkstra's Algorithm:** computes shortest road distances and reconstructs road paths between relevant delivery locations.
+4. **Route construction — Nearest-Neighbor TSP heuristic:** builds a round-trip sequence through the selected delivery locations, starting and ending at the depot.
 
-```
-[ Raw Parcel Orders & Road Graph (data/*.json) ]
-                       │
-                       ▼
-         ┌───────────────────────────┐
-         │ Stage 1: Custom Merge Sort│  Primary: Deadline (asc)
-         │       (sorting.py)        │  Secondary: Priority (desc)
-         └─────────────┬─────────────┘
-                       │ Sorted Inventory
-                       ▼
-         ┌───────────────────────────┐
-         │  Stage 2: 0/1 Knapsack DP │  Vehicle capacity constraint W
-         │       (knapsack.py)       │  DP Table printed for small input
-         └─────────────┬─────────────┘
-                       │ Selected High-Value Parcels
-                       ▼
-         ┌───────────────────────────┐
-         │  Stage 3: Dijkstra (heapq)│  Shortest paths across road network
-         │        (graph.py)         │  Computes metric distance matrix
-         └─────────────┬─────────────┘
-                       │ All-Pairs Shortest Distances & Paths
-                       ▼
-         ┌───────────────────────────┐
-         │ Stage 4: Nearest-Neighbor │  Round-trip tour from Depot (0)
-         │       TSP (tsp.py)        │  Returns full road traversal & total km
-         └─────────────┬─────────────┘
-                       │
-                       ▼
-         [ Final Courier Dispatch Manifest & Navigation Plan ]
+The route produced by Nearest-Neighbor is a heuristic solution. It is not guaranteed to be the globally shortest possible TSP tour.
+
+## Project Structure
+
+```text
+capstone_project/
+├── README.md
+├── report.md
+├── runtime.png
+└── courier_planner/
+    ├── __init__.py
+    ├── main.py
+    ├── parcels.py
+    ├── sorting.py
+    ├── knapsack.py
+    ├── graph.py
+    ├── tsp.py
+    ├── benchmark.py
+    ├── README.md
+    ├── report.md
+    ├── SUMMARY.md
+    ├── runtime.png
+    └── data/
+        ├── small.json
+        └── large.json
 ```
 
----
+## Requirements
 
-## 2. Algorithms & Complexity Summary
+- Python 3.10 or later
+- No third-party packages are required to run the main courier-planning pipeline.
+- `matplotlib` is required by the benchmark module to generate the runtime chart.
 
-| Pipeline Stage | Module | Algorithmic Paradigm | Time Complexity (Best/Worst) | Space Complexity | Purpose |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Parcel Ordering** | `sorting.py` | Divide & Conquer (Merge Sort) | $\Theta(N \log N)$ | $O(N)$ | Sorts orders without built-in `sort()`; strictly prioritizes early deadlines and high values. |
-| **Cargo Loading** | `knapsack.py` | Dynamic Programming (0/1 Knapsack) | $O(N \cdot W)$ | $O(N \cdot W)$ | Optimally packs vehicle capacity $W$ to maximize total delivery value. |
-| **Pathfinding** | `graph.py` | Greedy with Min-Heap (Dijkstra) | $O((V + E) \log V)$ per source | $O(V)$ | Finds shortest road distances and intermediate junctions between stops. |
-| **Route Synthesis**| `tsp.py` | Greedy Approximation (Nearest Neighbor) | $O(K^2)$ for $K$ destinations | $O(K)$ | Constructs closed delivery circuit starting and finishing at Depot (Node 0). |
+If Matplotlib is not installed, install it with:
 
-*Notation:*
-- $N$: Total number of parcels available.
-- $W$: Delivery vehicle maximum payload capacity (kg).
-- $V$: Number of junction vertices in the road network graph.
-- $E$: Number of road edges connecting vertices.
-- $K$: Number of distinct delivery stops selected for delivery ($K \le \min(N, V)$).
-
----
-
-## 3. Project Directory Structure
-
-```
-courier_planner/
-├── __init__.py           # Package declaration
-├── parcels.py            # Parcel dataclass, graph generator, JSON serializer/deserializer
-├── sorting.py            # From-scratch Merge Sort implementation (no built-in sort)
-├── knapsack.py           # 0/1 Knapsack DP with table printer and backtracking
-├── graph.py              # Dijkstra's shortest path with heapq and predecessor tracking
-├── tsp.py                # Nearest-Neighbor TSP tour approximation
-├── main.py               # End-to-end orchestration CLI
-├── benchmark.py          # Empirical time.perf_counter benchmark suite & chart generator
-├── runtime.png           # Exported runtime scaling chart
-├── README.md             # Project documentation and guide
-├── report.md             # In-depth algorithmic design report & comparative analysis
-└── data/
-    ├── small.json        # 10 parcels, 8 nodes, W = 25 kg
-    └── large.json        # 500 parcels, 100 nodes, W = 150 kg
-```
-
----
-
-## 4. Setup & How to Run
-
-### Prerequisites
-- Python 3.9+ (Python 3.13 tested)
-- `matplotlib` (for benchmark graph rendering)
-
-Install dependencies if needed:
 ```bash
-pip install matplotlib
+python -m pip install matplotlib
 ```
 
-### 1. Run Full End-to-End Pipeline (Small Dataset)
-Demonstrates parcel sorting, 0/1 Knapsack with DP table display, Dijkstra pathfinding, and TSP routing:
+## How to Run
+
+Run the commands below from the repository's root directory (`capstone_project`).
+
+### Small dataset
+
 ```bash
-python courier_planner/main.py --dataset small
+python -m courier_planner.main --dataset small
 ```
 
-### 2. Run Full Pipeline on Large Dataset (500 Parcels / 100 Nodes)
+The small dataset contains 10 parcels, 8 road-network nodes, and a vehicle capacity of 25 kg. The application displays the complete Knapsack DP table for this small instance.
+
+### Large dataset
+
 ```bash
-python courier_planner/main.py --dataset large
+python -m courier_planner.main --dataset large
 ```
 
-### 3. Run Benchmark Suite & Generate Scaling Chart
-Executes 5 iterations across sizes $N \in [10, 50, 100, 200, 500]$, outputs an ASCII performance table, and saves the visualization to `runtime.png`:
+The large dataset contains 500 parcels, 100 road-network nodes, and a vehicle capacity of 150 kg.
+
+### Run the benchmark
+
 ```bash
-python courier_planner/benchmark.py
+python -m courier_planner.benchmark
 ```
 
-### 4. Regenerate Synthetic Datasets
-Rebuilds reproducible datasets using fixed pseudo-random seeds:
-```bash
-python courier_planner/parcels.py
-```
+The benchmark measures the algorithm stages on the predefined datasets and on generated input sizes. It also generates runtime chart output. Execution times depend on the computer, Python version, and system load, so results may vary between runs.
 
----
+## Recorded Execution Results
 
-## 5. Sample Execution Output
+The following results were recorded from a local Windows execution on 13 November 2026. They are example observations from that run, not guaranteed timings for other systems.
 
-### Small Dataset (`small.json`)
-```
-###########################################################################
-       MINI-COURIER PLANNER: DAA CAPSTONE OPTIMIZATION PIPELINE
-###########################################################################
+### Pre-generated datasets
 
-[+] Loading problem instance from: courier_planner/data/small.json
-    - Total Parcels Available: 10
-    - Network Nodes (Junctions): 8 (Depot = Node 0)
-    - Delivery Vehicle Capacity: 25 kg
+| Dataset | Parcels | Road nodes | Capacity | Selected parcels | Priority value | Route distance | Total measured runtime |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Small | 10 | 8 | 25 kg | 7 | 129 | 122 km | 0.0805 ms |
+| Large | 500 | 100 | 150 kg | 85 | 2,914 | 259 km | 14.4930 ms |
 
-===========================================================================
-STAGE 1: MERGE SORT (Deadline Ascending, Priority Descending)
-===========================================================================
-Top 10 Sorted Parcels (Primary: Deadline, Secondary: Priority):
-Rank  ID      Deadline    Priority    Weight (kg)   Destination Node
------------------------------------------------------------------
-1     P#2     2           13          4             Node 6
-2     P#10    2           11          6             Node 4
-3     P#4     2           6           1             Node 2
-4     P#9     4           14          5             Node 7
-5     P#1     5           6           2             Node 2
-6     P#8     7           15          1             Node 3
-7     P#6     9           17          9             Node 4
-8     P#5     10          37          4             Node 1
-9     P#7     10          33          4             Node 3
-10    P#3     10          10          9             Node 4
+### Generated benchmark sizes
 
-===========================================================================
-STAGE 2: 0/1 KNAPSACK SELECTION (Dynamic Programming)
-===========================================================================
-Selecting maximum-value parcel subset within vehicle capacity W = 25 kg...
+| Parcels (N) | Nodes (V) | Capacity (W) | Merge Sort (ms) | Knapsack (ms) | Dijkstra (ms) | TSP (ms) | Total (ms) |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 10 | 8 | 25 | 0.0174 | 0.0444 | 0.0539 | 0.0075 | 0.1232 |
+| 50 | 10 | 25 | 0.0560 | 0.1114 | 0.0564 | 0.0054 | 0.2292 |
+| 100 | 20 | 33 | 0.0854 | 0.2079 | 0.2007 | 0.0107 | 0.5046 |
+| 200 | 40 | 66 | 0.1885 | 0.8744 | 0.9360 | 0.0312 | 2.0300 |
+| 500 | 100 | 166 | 0.5972 | 6.1248 | 9.4065 | 0.1579 | 16.2863 |
 
-0/1 KNAPSACK DYNAMIC PROGRAMMING TABLE
-Rows: Items considered (0 = no items, i = up to parcel i)
-Cols: Current capacity constraint (0 to W)
+**Important:** The generated 500-parcel benchmark uses a capacity of 166 kg, while the pre-generated `large.json` dataset uses 150 kg. These are separate test configurations and should not be compared as if they were identical inputs. The benchmark's five-iteration measurements are environment-dependent.
 
-Item (ID, W, V)      |   0   1   2   3   4   5  ...  23  24  25
----------------------------------------------------------------
-0: [No Items]        |   0   0   0   0   0   0  ...   0   0   0
-1: P#2 (w=4, v=13)   |   0   0   0   0  13  13  ...  13  13  13
-2: P#10 (w=6, v=11)  |   0   0   0   0  13  13  ...  24  24  24
-...
-9: P#7 (w=4, v=33)   |   0  15  21  21  37  52  ... 124 124 129
-10: P#3 (w=9, v=10)  |   0  15  21  21  37  52  ... 124 124 129
+## Algorithmic Complexity
 
-[Knapsack Optimization Result]
-  - Parcels Accepted for Loading: 7 of 10
-  - Total Priority Value:          129 pts
-  - Total Weight Utilized:         25 / 25 kg (100.0%)
-  - Remaining Vehicle Capacity:    0 kg
+Let:
+- `N` = number of parcels
+- `W` = vehicle capacity (in the integer weight units used by the DP)
+- `V` = number of road-network vertices
+- `E` = number of road-network edges
+- `K` = number of distinct selected delivery locations
 
-Loaded Cargo Manifest:
-ID      Weight    Priority    Deadline    Destination Node
--------------------------------------------------------
-P#2     4         13          2           Node 6
-P#10    6         11          2           Node 4
-P#4     1         6           2           Node 2
-P#9     5         14          4           Node 7
-P#8     1         15          7           Node 3
-P#5     4         37          10          Node 1
-P#7     4         33          10          Node 3
+| Stage | Algorithm | Time complexity | Space complexity |
+|---|---|---|---|
+| Parcel ordering | Merge Sort | Θ(N log N) | O(N) |
+| Cargo selection | 0/1 Knapsack DP | O(NW) | O(NW) |
+| Shortest paths | Heap-based Dijkstra, per source | O((V + E) log V) | O(V) |
+| Multiple-source shortest paths | Dijkstra from each required source | O(K(V + E) log V) | Depends on stored distance/path matrices |
+| Delivery sequence | Nearest-Neighbor over K locations | O(K²) | O(K) |
 
-===========================================================================
-STAGE 3: ROUTING (Dijkstra Shortest Paths + Nearest-Neighbor TSP)
-===========================================================================
-Delivery Stop Sequence (7 legs):
-  Depot(0) -> Node 1 -> Node 6 -> Node 2 -> Node 3 -> Node 7 -> Node 4 -> Depot(0)
+The Knapsack complexity is pseudo-polynomial because it depends on the numeric capacity `W`, not only on the number of parcels. The exact routing workload also depends on how many source locations require Dijkstra runs.
 
-Leg-by-Leg Details:
-  Leg  1: Depot(0)   --> Node 1     | Distance:   4 km | Cum:   4 km
-  Leg  2: Node 1     --> Node 6     | Distance:  13 km | Cum:  17 km
-  Leg  3: Node 6     --> Node 2     | Distance:   9 km | Cum:  26 km
-  Leg  4: Node 2     --> Node 3     | Distance:  12 km | Cum:  38 km
-  Leg  5: Node 3     --> Node 7     | Distance:  39 km | Cum:  77 km
-  Leg  6: Node 7     --> Node 4     | Distance:  22 km | Cum:  99 km
-  Leg  7: Node 4     --> Depot(0)   | Distance:  23 km | Cum: 122 km
+## Output Produced
 
-Detailed Road-Network Navigation (All Junctions Traversed):
-  0 -> 1 -> 6 -> 2 -> 3 -> 0 -> 7 -> 5 -> 4 -> 0
+The command-line application reports:
 
-Total Round-Trip Distance: 122 km
-```
+- Parcel ordering by deadline and priority
+- Knapsack selection, total selected weight, and total priority value
+- Delivery-stop sequence
+- Shortest road path for each route leg
+- Cumulative and total round-trip distance
+- Final dispatch summary
 
----
+## Limitations
 
-## 6. Verification and Tests
+- The Knapsack objective maximizes total priority value under the weight constraint; it does not itself guarantee that every selected parcel's deadline will be met.
+- Nearest-Neighbor is a heuristic and does not guarantee an optimal TSP route.
+- The model uses a static weighted road graph; it does not account for live traffic, changing road conditions, or time-dependent travel.
+- The benchmark timings are machine-dependent and should be interpreted as observations from the recorded test environment.
+- The generated benchmark and the pre-generated JSON datasets use different capacity settings at the 500-parcel scale.
 
-All modules include standalone unit self-tests that can be executed directly:
-- `python courier_planner/sorting.py`: Verifies Merge Sort ordering and tie-breaking.
-- `python courier_planner/knapsack.py`: Verifies DP recurrence, table rendering, and item recovery.
-- `python courier_planner/graph.py`: Verifies Dijkstra shortest distance and path backtracking.
-- `python courier_planner/tsp.py`: Verifies nearest-neighbor tour construction.
+## Further Scope
 
+Possible extensions include deadline-feasibility checks using estimated arrival times, comparison of Nearest-Neighbor with local-search methods such as 2-Opt, and modelling the problem as a Vehicle Routing Problem with Time Windows (VRPTW).
+
+## Detailed Report
+
+See [`report.md`](report.md) for the detailed problem formulation, algorithm design, complexity discussion, and experimental analysis.
